@@ -613,8 +613,12 @@ function unmarkPaymentStep(invoiceId, step) {
 
 // View invoice details
 function viewInvoiceDetails(invoiceId) {
-    document.getElementById('invoiceDetailsContent').innerHTML = \`
-        <div class="text-center">
+    const modal = new bootstrap.Modal(document.getElementById('invoiceDetailsModal'));
+    const content = document.getElementById('invoiceDetailsContent');
+    
+    // Show loading state
+    content.innerHTML = \`
+        <div class="text-center py-4">
             <div class="spinner-border text-primary" role="status">
                 <span class="visually-hidden">جاري التحميل...</span>
             </div>
@@ -622,18 +626,410 @@ function viewInvoiceDetails(invoiceId) {
         </div>
     \`;
     
-    const modal = new bootstrap.Modal(document.getElementById('invoiceDetailsModal'));
     modal.show();
     
-    // Simulate loading
-    setTimeout(() => {
-        document.getElementById('invoiceDetailsContent').innerHTML = \`
-            <div class="alert alert-info">
-                <i class="fas fa-info-circle"></i>
-                تفاصيل الفاتورة ستظهر هنا. يمكن تطوير هذه الميزة لاحقاً.
+    // Find invoice data
+    const invoice = invoicesData.find(inv => inv._id === invoiceId);
+    
+    if (!invoice) {
+        content.innerHTML = \`
+            <div class="alert alert-danger">
+                <i class="fas fa-exclamation-triangle"></i>
+                لم يتم العثور على بيانات الفاتورة
             </div>
         \`;
-    }, 1000);
+        return;
+    }
+    
+    // Calculate commission details
+    const clientCommission = (invoice.amount * invoice.clientCommissionRate) / 100;
+    const distributorCommission = (invoice.amount * invoice.distributorCommissionRate) / 100;
+    const companyCommission = (invoice.amount * invoice.companyCommissionRate) / 100;
+    const netProfit = invoice.amount - clientCommission - distributorCommission - companyCommission;
+    
+    // Determine payment status
+    let paymentStatus = 'client_pending';
+    let paymentStatusText = 'في انتظار العميل';
+    let paymentStatusClass = 'bg-danger';
+    let progressPercent = 0;
+    
+    if (invoice.paymentStatus.adminToCompany.isPaid) {
+        paymentStatus = 'fully_completed';
+        paymentStatusText = 'مكتملة الدفع';
+        paymentStatusClass = 'bg-success';
+        progressPercent = 100;
+    } else if (invoice.paymentStatus.distributorToAdmin.isPaid) {
+        paymentStatus = 'admin_pending';
+        paymentStatusText = 'في انتظار الإدارة';
+        paymentStatusClass = 'bg-info';
+        progressPercent = 67;
+    } else if (invoice.paymentStatus.clientToDistributor.isPaid) {
+        paymentStatus = 'distributor_pending';
+        paymentStatusText = 'في انتظار الموزع';
+        paymentStatusClass = 'bg-warning';
+        progressPercent = 33;
+    }
+    
+    // Generate detailed modal content
+    content.innerHTML = \`
+        <div class="row">
+            <!-- Invoice Information -->
+            <div class="col-md-8">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-file-invoice text-primary"></i>
+                            معلومات الفاتورة
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="info-item">
+                                    <label class="info-label">رقم الفاتورة</label>
+                                    <div class="info-value">
+                                        <strong>\${invoice.invoiceCode}</strong>
+                                    </div>
+                                </div>
+                                
+                                <div class="info-item">
+                                    <label class="info-label">العميل</label>
+                                    <div class="info-value">
+                                        <span class="badge bg-info">\${invoice.client?.fullName || 'غير محدد'}</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="info-item">
+                                    <label class="info-label">الملف</label>
+                                    <div class="info-value">\${invoice.file?.fileName || 'غير محدد'}</div>
+                                </div>
+                                
+                                <div class="info-item">
+                                    <label class="info-label">الشركة</label>
+                                    <div class="info-value">
+                                        <span class="badge bg-secondary">\${invoice.file?.company?.name || 'غير محدد'}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="info-item">
+                                    <label class="info-label">الموزع المكلف</label>
+                                    <div class="info-value">
+                                        <span class="badge bg-primary">\${invoice.assignedDistributor?.username || 'غير محدد'}</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="info-item">
+                                    <label class="info-label">مبلغ الفاتورة</label>
+                                    <div class="info-value">
+                                        <span class="badge bg-success fs-6">\${invoice.amount.toLocaleString('ar-SA')} جنيه</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="info-item">
+                                    <label class="info-label">تاريخ الفاتورة</label>
+                                    <div class="info-value">\${new Date(invoice.invoiceDate).toLocaleDateString('ar-SA')}</div>
+                                </div>
+                                
+                                <div class="info-item">
+                                    <label class="info-label">تاريخ الإنشاء</label>
+                                    <div class="info-value">\${new Date(invoice.createdAt).toLocaleDateString('ar-SA')}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Commission Details -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-percentage text-warning"></i>
+                            تفاصيل العمولات
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4 text-center">
+                                <div class="commission-card">
+                                    <h6 class="text-primary">عمولة العميل</h6>
+                                    <h4 class="text-primary">\${clientCommission.toFixed(2)} جنيه</h4>
+                                    <small class="text-muted">%\${invoice.clientCommissionRate}</small>
+                                </div>
+                            </div>
+                            <div class="col-md-4 text-center">
+                                <div class="commission-card">
+                                    <h6 class="text-success">عمولة الموزع</h6>
+                                    <h4 class="text-success">\${distributorCommission.toFixed(2)} جنيه</h4>
+                                    <small class="text-muted">%\${invoice.distributorCommissionRate}</small>
+                                </div>
+                            </div>
+                            <div class="col-md-4 text-center">
+                                <div class="commission-card">
+                                    <h6 class="text-info">عمولة الشركة</h6>
+                                    <h4 class="text-info">\${companyCommission.toFixed(2)} جنيه</h4>
+                                    <small class="text-muted">%\${invoice.companyCommissionRate}</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <hr>
+                        
+                        <div class="row">
+                            <div class="col-md-6 text-center">
+                                <h6>إجمالي العمولات</h6>
+                                <h4 class="text-warning">\${(clientCommission + distributorCommission + companyCommission).toFixed(2)} جنيه</h4>
+                            </div>
+                            <div class="col-md-6 text-center">
+                                <h6>صافي الربح</h6>
+                                <h4 class="\${netProfit >= 0 ? 'text-success' : 'text-danger'}">\${netProfit.toFixed(2)} جنيه</h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Payment Status -->
+            <div class="col-md-4">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-route text-info"></i>
+                            حالة الدفع
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="payment-status-overview mb-3">
+                            <div class="text-center">
+                                <span class="badge \${paymentStatusClass} fs-6">\${paymentStatusText}</span>
+                                <div class="progress mt-2" style="height: 8px;">
+                                    <div class="progress-bar bg-success" style="width: \${progressPercent}%"></div>
+                                </div>
+                                <small class="text-muted">\${progressPercent}% مكتمل</small>
+                            </div>
+                        </div>
+                        
+                        <div class="payment-steps">
+                            <!-- Step 1: Client to Distributor -->
+                            <div class="payment-step \${invoice.paymentStatus.clientToDistributor.isPaid ? 'completed' : 'pending'}">
+                                <div class="step-icon">
+                                    <i class="fas \${invoice.paymentStatus.clientToDistributor.isPaid ? 'fa-check-circle' : 'fa-clock'}"></i>
+                                </div>
+                                <div class="step-content">
+                                    <div class="step-title">عميل → موزع</div>
+                                    <div class="step-status">
+                                        \${invoice.paymentStatus.clientToDistributor.isPaid ? 
+                                            'تم الدفع في ' + new Date(invoice.paymentStatus.clientToDistributor.paidAt).toLocaleDateString('ar-SA') :
+                                            'في انتظار الدفع'
+                                        }
+                                    </div>
+                                    \${invoice.paymentStatus.clientToDistributor.markedBy ? 
+                                        '<small class="text-muted">بواسطة: ' + (invoice.paymentStatus.clientToDistributor.markedBy.username || 'غير محدد') + '</small>' : 
+                                        ''
+                                    }
+                                </div>
+                            </div>
+                            
+                            <!-- Step 2: Distributor to Admin -->
+                            <div class="payment-step \${invoice.paymentStatus.distributorToAdmin.isPaid ? 'completed' : 'pending'}">
+                                <div class="step-icon">
+                                    <i class="fas \${invoice.paymentStatus.distributorToAdmin.isPaid ? 'fa-check-circle' : 'fa-clock'}"></i>
+                                </div>
+                                <div class="step-content">
+                                    <div class="step-title">موزع → إدارة</div>
+                                    <div class="step-status">
+                                        \${invoice.paymentStatus.distributorToAdmin.isPaid ? 
+                                            'تم الدفع في ' + new Date(invoice.paymentStatus.distributorToAdmin.paidAt).toLocaleDateString('ar-SA') :
+                                            'في انتظار الدفع'
+                                        }
+                                    </div>
+                                    \${invoice.paymentStatus.distributorToAdmin.markedBy ? 
+                                        '<small class="text-muted">بواسطة: ' + (invoice.paymentStatus.distributorToAdmin.markedBy.username || 'غير محدد') + '</small>' : 
+                                        ''
+                                    }
+                                </div>
+                            </div>
+                            
+                            <!-- Step 3: Admin to Company -->
+                            <div class="payment-step \${invoice.paymentStatus.adminToCompany.isPaid ? 'completed' : 'pending'}">
+                                <div class="step-icon">
+                                    <i class="fas \${invoice.paymentStatus.adminToCompany.isPaid ? 'fa-check-circle' : 'fa-clock'}"></i>
+                                </div>
+                                <div class="step-content">
+                                    <div class="step-title">إدارة → شركة</div>
+                                    <div class="step-status">
+                                        \${invoice.paymentStatus.adminToCompany.isPaid ? 
+                                            'تم الدفع في ' + new Date(invoice.paymentStatus.adminToCompany.paidAt).toLocaleDateString('ar-SA') :
+                                            'في انتظار الدفع'
+                                        }
+                                    </div>
+                                    \${invoice.paymentStatus.adminToCompany.markedBy ? 
+                                        '<small class="text-muted">بواسطة: ' + (invoice.paymentStatus.adminToCompany.markedBy.username || 'غير محدد') + '</small>' : 
+                                        ''
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Actions -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-cogs"></i>
+                            الإجراءات
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            \${userPermissions && userPermissions.canUpdate ? \`
+                                <a href="/invoices/\${invoice._id}/edit" class="btn btn-primary">
+                                    <i class="fas fa-edit me-2"></i>
+                                    تعديل الفاتورة
+                                </a>
+                            \` : ''}
+                            
+                            \${userPermissions && userPermissions.canDelete ? \`
+                                <button class="btn btn-outline-danger" onclick="deleteInvoice('\${invoice._id}', '\${invoice.invoiceCode}')">
+                                    <i class="fas fa-trash me-2"></i>
+                                    حذف الفاتورة
+                                </button>
+                            \` : ''}
+                            
+                            <button class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                                <i class="fas fa-times me-2"></i>
+                                إغلاق
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <style>
+        .info-item {
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .info-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+        
+        .info-label {
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+            display: block;
+        }
+        
+        .info-value {
+            color: var(--text-primary);
+            font-size: 1rem;
+        }
+        
+        .commission-card {
+            padding: 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            margin-bottom: 10px;
+            background-color: var(--bg-tertiary);
+        }
+        
+        .payment-steps {
+            position: relative;
+        }
+        
+        .payment-step {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        
+        .payment-step:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 35px;
+            width: 2px;
+            height: 25px;
+            background-color: var(--border-color);
+        }
+        
+        .payment-step.completed::after {
+            background-color: #28a745;
+        }
+        
+        .step-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 15px;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+        
+        .payment-step.completed .step-icon {
+            background-color: #28a745;
+            color: white;
+        }
+        
+        .payment-step.pending .step-icon {
+            background-color: #ffc107;
+            color: #212529;
+        }
+        
+        .step-content {
+            flex-grow: 1;
+        }
+        
+        .step-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 3px;
+        }
+        
+        .step-status {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 2px;
+        }
+        
+        /* Dark mode adjustments */
+        [data-theme="dark"] .commission-card {
+            background-color: var(--bg-secondary);
+            border-color: var(--border-color);
+        }
+        
+        [data-theme="dark"] .info-item {
+            border-bottom-color: var(--border-color);
+        }
+        
+        [data-theme="dark"] .info-label {
+            color: var(--text-secondary);
+        }
+        
+        [data-theme="dark"] .info-value {
+            color: var(--text-primary);
+        }
+        
+        [data-theme="dark"] .step-title {
+            color: var(--text-primary);
+        }
+        
+        [data-theme="dark"] .step-status {
+            color: var(--text-secondary);
+        }
+        </style>
+    \`;
 }
 
 // Delete invoice

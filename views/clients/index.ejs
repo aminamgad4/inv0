@@ -307,10 +307,26 @@
 [data-theme="dark"] .modal-content {
     background-color: var(--card-bg);
     color: var(--text-primary);
+    border-color: var(--border-color);
 }
 
 [data-theme="dark"] .modal-header {
     border-bottom-color: var(--border-color);
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .modal-body {
+    background-color: var(--card-bg);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .modal-title {
+    color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .btn-close {
+    filter: invert(1);
 }
 </style>
 

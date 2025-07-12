@@ -403,6 +403,32 @@
     background: linear-gradient(135deg, #4a5568 0%, #553c9a 100%) !important;
 }
 
+/* Enhanced modal dark mode support */
+[data-theme="dark"] .modal-content {
+    background-color: var(--card-bg);
+    color: var(--text-primary);
+    border-color: var(--border-color);
+}
+
+[data-theme="dark"] .modal-header {
+    border-bottom-color: var(--border-color);
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .modal-body {
+    background-color: var(--card-bg);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .modal-title {
+    color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .btn-close {
+    filter: invert(1);
+}
+
 /* Animation enhancements */
 .distributor-row {
     transition: all 0.3s ease;
