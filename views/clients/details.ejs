@@ -302,6 +302,8 @@
             padding: 12px;
             vertical-align: middle;
             border-color: var(--border-color);
+            background-color: var(--table-bg);
+            color: var(--text-primary);
         }
 
         .invoice-code {
@@ -355,6 +357,82 @@
         .empty-state p {
             color: var(--text-muted);
             margin-bottom: 25px;
+        }
+        
+        /* Dark mode specific enhancements */
+        [data-theme="dark"] .client-avatar {
+            background: var(--primary-gradient);
+        }
+        
+        [data-theme="dark"] .detail-item {
+            border-bottom-color: var(--border-color);
+        }
+        
+        [data-theme="dark"] .detail-label {
+            color: var(--text-secondary);
+        }
+        
+        [data-theme="dark"] .detail-value {
+            color: var(--text-primary);
+        }
+        
+        [data-theme="dark"] .contact-link {
+            color: var(--text-primary);
+        }
+        
+        [data-theme="dark"] .contact-link:hover {
+            color: #51cf66;
+        }
+        
+        [data-theme="dark"] .invoice-summary-card {
+            background: linear-gradient(135deg, rgba(74, 85, 104, 0.1) 0%, rgba(85, 60, 154, 0.1) 100%);
+            border-color: rgba(74, 85, 104, 0.2);
+        }
+        
+        [data-theme="dark"] .summary-number {
+            color: var(--text-primary);
+        }
+        
+        [data-theme="dark"] .summary-label {
+            color: var(--text-secondary);
+        }
+        
+        [data-theme="dark"] .invoice-table {
+            box-shadow: 0 8px 25px var(--shadow-color);
+        }
+        
+        [data-theme="dark"] .invoice-table th {
+            background: var(--primary-gradient);
+        }
+        
+        [data-theme="dark"] .invoice-table td {
+            background-color: var(--table-bg);
+            color: var(--text-primary);
+            border-color: var(--border-color);
+        }
+        
+        [data-theme="dark"] .invoice-table tbody tr:nth-of-type(odd) td {
+            background-color: var(--bg-tertiary);
+        }
+        
+        [data-theme="dark"] .invoice-code {
+            color: var(--text-primary);
+        }
+        
+        [data-theme="dark"] .empty-state {
+            color: var(--text-muted);
+        }
+        
+        [data-theme="dark"] .empty-state h5 {
+            color: var(--text-secondary);
+        }
+        
+        [data-theme="dark"] .empty-state p {
+            color: var(--text-muted);
+        }
+        
+        [data-theme="dark"] .action-btn:hover {
+            box-shadow: 0 4px 12px rgba(255,255,255,0.15);
         }
         
         @media (max-width: 768px) {

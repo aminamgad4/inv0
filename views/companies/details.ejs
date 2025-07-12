@@ -211,6 +211,218 @@
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
         }
         
+        /* Enhanced company details styling */
+        .company-info-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .company-stat-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .company-stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px var(--shadow-color);
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--text-primary);
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        
+        .info-row {
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .info-row:last-child {
+            border-bottom: none;
+        }
+        
+        .info-label {
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 5px;
+        }
+        
+        .info-value {
+            color: var(--text-primary);
+            font-size: 1.1rem;
+        }
+        
+        /* Tab styling */
+        .nav-tabs {
+            border-bottom: 2px solid var(--border-color);
+        }
+        
+        .nav-tabs .nav-link {
+            color: var(--text-secondary);
+            border: none;
+            border-bottom: 2px solid transparent;
+            background: none;
+            padding: 12px 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-tabs .nav-link:hover {
+            color: var(--text-primary);
+            border-bottom-color: var(--primary-color, #667eea);
+        }
+        
+        .nav-tabs .nav-link.active {
+            color: var(--primary-color, #667eea);
+            border-bottom-color: var(--primary-color, #667eea);
+            background: none;
+        }
+        
+        /* Enhanced table styling for files and invoices */
+        .details-table {
+            background: var(--table-bg);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px var(--shadow-color);
+        }
+        
+        .details-table th {
+            background: var(--primary-gradient);
+            color: white !important;
+            font-weight: 600;
+            padding: 12px;
+            border: none;
+        }
+        
+        .details-table td {
+            padding: 12px;
+            vertical-align: middle;
+            border-color: var(--border-color);
+            background-color: var(--table-bg);
+            color: var(--text-primary);
+        }
+        
+        .details-table tbody tr:nth-of-type(odd) td {
+            background-color: var(--bg-tertiary);
+        }
+        
+        .details-table tbody tr:hover td {
+            background-color: rgba(102, 126, 234, 0.1);
+        }
+        
+        /* Empty state styling */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-muted);
+        }
+        
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+        
+        .empty-state p {
+            color: var(--text-muted);
+            margin-bottom: 20px;
+        }
+        
+        /* Dark mode specific enhancements */
+        [data-theme="dark"] .company-info-card {
+            background-color: var(--card-bg);
+            border-color: var(--border-color);
+        }
+        
+        [data-theme="dark"] .company-stat-card {
+            background-color: var(--card-bg);
+            border-color: var(--border-color);
+        }
+        
+        [data-theme="dark"] .company-stat-card:hover {
+            box-shadow: 0 4px 15px var(--shadow-color);
+        }
+        
+        [data-theme="dark"] .stat-number {
+            color: var(--text-primary);
+        }
+        
+        [data-theme="dark"] .stat-label {
+            color: var(--text-secondary);
+        }
+        
+        [data-theme="dark"] .info-row {
+            border-bottom-color: var(--border-color);
+        }
+        
+        [data-theme="dark"] .info-label {
+            color: var(--text-secondary);
+        }
+        
+        [data-theme="dark"] .info-value {
+            color: var(--text-primary);
+        }
+        
+        [data-theme="dark"] .nav-tabs {
+            border-bottom-color: var(--border-color);
+        }
+        
+        [data-theme="dark"] .nav-tabs .nav-link {
+            color: var(--text-secondary);
+        }
+        
+        [data-theme="dark"] .nav-tabs .nav-link:hover {
+            color: var(--text-primary);
+        }
+        
+        [data-theme="dark"] .nav-tabs .nav-link.active {
+            color: #667eea;
+        }
+        
+        [data-theme="dark"] .details-table {
+            background: var(--table-bg);
+            box-shadow: 0 4px 15px var(--shadow-color);
+        }
+        
+        [data-theme="dark"] .details-table th {
+            background: var(--primary-gradient);
+        }
+        
+        [data-theme="dark"] .details-table td {
+            background-color: var(--table-bg);
+            color: var(--text-primary);
+            border-color: var(--border-color);
+        }
+        
+        [data-theme="dark"] .details-table tbody tr:nth-of-type(odd) td {
+            background-color: var(--bg-tertiary);
+        }
+        
+        [data-theme="dark"] .details-table tbody tr:hover td {
+            background-color: rgba(59, 130, 246, 0.1);
+        }
+        
+        [data-theme="dark"] .empty-state {
+            color: var(--text-muted);
+        }
+        
+        [data-theme="dark"] .empty-state p {
+            color: var(--text-muted);
+        }
+        
         @media (max-width: 768px) {
             .sidebar {
                 position: fixed;
